@@ -14,3 +14,7 @@ try it and you’ll see.
 Write a program that creates errors in the input text, 1 random error per 3 characters.
 i.e. "abc" can be "\*bc" or "a\*c" or "ab\*", where * is a random character.
 
+##### Stage 2: Symbol-level correction code
+Update program to now take the input text and encode the message by tripling all the symbols. Simulate transmission of
+the text by introducing errors into it (as done in stage 1), and finally decoding the message. Output the result of each
+step.
