@@ -4,6 +4,11 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        File file = new File();
+        file.readWrite();
+    }
+
+    public static void message() {
         final Scanner scanner = new Scanner(System.in);
 
         String input = scanner.nextLine();

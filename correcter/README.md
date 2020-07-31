@@ -18,3 +18,8 @@ i.e. "abc" can be "\*bc" or "a\*c" or "ab\*", where * is a random character.
 Update program to now take the input text and encode the message by tripling all the symbols. Simulate transmission of
 the text by introducing errors into it (as done in stage 1), and finally decoding the message. Output the result of each
 step.
+
+##### Stage 3: Bit-level error emulator
+Write a program which will read from one file ("send.txt") and write to another ("received.txt") while changing one bit
+in every byte. Introduces using Java Streams for more than reading/writing to the console. Also makes use of bit-wise
+operators to manipulate the data.
