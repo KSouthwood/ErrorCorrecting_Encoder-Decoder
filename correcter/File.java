@@ -114,4 +114,154 @@ public class File {
             e.printStackTrace();
         }
     }
+
+    public void encodeFileHamming(String readFile, String writeFile) {
+        int data_out;
+        int nybble;
+
+        try (FileInputStream infile = new FileInputStream(readFile);
+             FileOutputStream outfile = new FileOutputStream(writeFile)) {
+            for (int data_in = infile.read(); data_in != -1; data_in = infile.read()) {
+                nybble = data_in & 0b11110000;
+                nybble = nybble >>> 4;
+                data_out = encodeHamming(nybble);
+                outfile.write(data_out);
+                nybble = data_in & 0b00001111;
+                data_out = encodeHamming(nybble);
+                outfile.write(data_out);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void decodeFileHamming(String readFile, String writeFile) {
+        int data_out;
+        byte[] bytes_in = new byte[2];
+
+        try (FileInputStream infile = new FileInputStream(readFile);
+             FileOutputStream outfile = new FileOutputStream(writeFile)) {
+            for (int data_in = infile.read(bytes_in); data_in != -1; data_in = infile.read(bytes_in)) {
+                data_out = decodeHamming(bytes_in[0]);
+                data_out = data_out << 4;
+                data_out += decodeHamming(bytes_in[1]);
+                outfile.write(data_out);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private int encodeHamming(int nybble) {
+        // encoded:   p1 p2 d3 p4 d5 d6 d7 d8 (d8 not used, always set to 0)
+        // BIT_PATTS:  0  1  2  3  4  5  6  7
+        int encoded = 0;
+        int p1 = 0; // parity 1 - d3, d5, d7
+        int p2 = 0; // parity 2 - d3, d6, d7
+        int p4 = 0; // parity 4 - d5, d6, d7
+
+        if ((nybble & BIT_PATTS[4]) != 0) {
+            encoded += BIT_PATTS[2];
+            p1 ^= 1;
+            p2 ^= 1;
+        }
+
+        if ((nybble & BIT_PATTS[5]) != 0) {
+            encoded += BIT_PATTS[4];
+            p1 ^= 1;
+            p4 ^= 1;
+        }
+
+        if ((nybble & BIT_PATTS[6]) != 0) {
+            encoded += BIT_PATTS[5];
+            p2 ^= 1;
+            p4 ^= 1;
+        }
+
+        if ((nybble & BIT_PATTS[7]) != 0) {
+            encoded += BIT_PATTS[6];
+            p1 ^= 1;
+            p2 ^= 1;
+            p4 ^= 1;
+        }
+
+        if (p1 != 0) {
+            encoded += BIT_PATTS[0];
+        }
+
+        if (p2 != 0) {
+            encoded += BIT_PATTS[1];
+        }
+
+        if (p4 != 0) {
+            encoded += BIT_PATTS[3];
+        }
+
+        return encoded;
+    }
+
+    private int decodeHamming(int encoded) {
+        int decoded = 0;
+        int p1 = 0;
+        int p2 = 0;
+        int p4 = 0;
+
+        if ((encoded & BIT_PATTS[2]) != 0) {
+            decoded += BIT_PATTS[4];
+            p1 ^= 1;
+            p2 ^= 1;
+        }
+
+        if ((encoded & BIT_PATTS[4]) != 0) {
+            decoded += BIT_PATTS[5];
+            p1 ^= 1;
+            p4 ^= 1;
+        }
+
+        if ((encoded & BIT_PATTS[5]) != 0) {
+            decoded += BIT_PATTS[6];
+            p2 ^= 1;
+            p4 ^= 1;
+        }
+
+        if ((encoded & BIT_PATTS[6]) != 0) {
+            decoded += BIT_PATTS[7];
+            p1 ^= 1;
+            p2 ^= 1;
+            p4 ^= 1;
+        }
+
+        int error = 0;
+
+        if ((p1 != 0) ^ ((encoded & BIT_PATTS[0]) != 0)) {
+            error += 1;
+        }
+
+        if ((p2 != 0) ^ ((encoded & BIT_PATTS[1]) != 0)) {
+            error += 2;
+        }
+
+        if ((p4 != 0) ^ ((encoded & BIT_PATTS[3]) != 0)) {
+            error += 4;
+        }
+
+        switch (error) {
+            case 3:
+                decoded += (encoded & BIT_PATTS[2]) == 0 ? BIT_PATTS[4] : -BIT_PATTS[4];
+                break;
+            case 5:
+                decoded += (encoded & BIT_PATTS[4]) == 0 ? BIT_PATTS[5] : -BIT_PATTS[5];
+                break;
+            case 6:
+                decoded += (encoded & BIT_PATTS[5]) == 0 ? BIT_PATTS[6] : -BIT_PATTS[6];
+                break;
+            case 7:
+                decoded += (encoded & BIT_PATTS[6]) == 0 ? BIT_PATTS[7] : -BIT_PATTS[7];
+                break;
+            default:
+                break;
+        }
+
+        return decoded;
+    }
 }

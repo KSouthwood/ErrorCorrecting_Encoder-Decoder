@@ -14,7 +14,7 @@ public class Main {
         System.out.println("Write a mode: ");
         switch (scanner.nextLine()) {
             case "encode":
-                file.encodeFile("send.txt",
+                file.encodeFileHamming("send.txt",
                         "encoded.txt");
                 break;
             case "send":
@@ -22,13 +22,14 @@ public class Main {
                         "received.txt");
                 break;
             case "decode":
-                file.decodeFile("received.txt",
+                file.decodeFileHamming("received.txt",
                         "decoded.txt");
                 break;
             default:
                 break;
         }
     }
+
 //    public static void message() {
 //        final Scanner scanner = new Scanner(System.in);
 //
